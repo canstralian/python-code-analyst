@@ -18,6 +18,9 @@ st.title("Let's do code review for your python code")
 st.header("Please upload your .py file here:")
 
 
+# Retrieve the API key from Hugging Face secret
+api_key = os.getenv('OPENAI_API_KEY')
+
 # Function to download text content as a file using Streamlit
 def text_downloader(raw_text):
     # Generate a timestamp for the filename to ensure uniqueness
@@ -52,7 +55,7 @@ if data:
     st.write(fetched_data)
 
     # Initialize a ChatOpenAI instance with the specified model name "gpt-3.5-turbo" and a temperature of 0.9.
-    chat = ChatOpenAI(os.getenv("OPENAI_API_KEY"),model_name="gpt-3.5-turbo", temperature=0.9)
+    chat = ChatOpenAI(api_key,model_name="gpt-3.5-turbo", temperature=0.9)
 
     # Create a SystemMessage instance with the specified content, providing information about the assistant's role.
     systemMessage = SystemMessage(content="You are a code review assistant. Provide detailed suggestions to improve the given Python code along by mentioning the existing code line by line with proper indent")
