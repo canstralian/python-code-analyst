@@ -8,6 +8,7 @@ import streamlit as st
 from dotenv import load_dotenv
 import time
 import base64
+import os
 
 
 #This function is typically used in Python to load environment variables from a .env file into the application's environment.
