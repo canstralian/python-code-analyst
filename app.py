@@ -10,6 +10,21 @@ import time
 import base64
 import os
 
+class ChatOpenAI:
+    def __init__(self, api_key, model_name="gpt-3.5-turbo", temperature=0.9):
+        self.api_key = api_key
+        self.model_name = model_name
+        self.temperature = temperature
+        openai.api_key = self.api_key
+
+    def chat(self, prompt):
+        response = openai.ChatCompletion.create(
+            model=self.model_name,
+            messages=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": prompt}],
+            temperature=self.temperature
+        )
+        return response['choices'][0]['message']['content']
+        
 
 #This function is typically used in Python to load environment variables from a .env file into the application's environment.
 load_dotenv()
