@@ -52,7 +52,7 @@ if data:
     st.write(fetched_data)
 
     # Initialize a ChatOpenAI instance with the specified model name "gpt-3.5-turbo" and a temperature of 0.9.
-    chat = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.9)
+    chat = ChatOpenAI(os.getenv("OPENAI_API_KEY"),model_name="gpt-3.5-turbo", temperature=0.9,ap)
 
     # Create a SystemMessage instance with the specified content, providing information about the assistant's role.
     systemMessage = SystemMessage(content="You are a code review assistant. Provide detailed suggestions to improve the given Python code along by mentioning the existing code line by line with proper indent")
