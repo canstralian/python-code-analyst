@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import time
 import base64
 import os
+import openai
 
 class ChatOpenAI:
     def __init__(self, api_key, model_name="gpt-3.5-turbo", temperature=0.9):
