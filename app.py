@@ -1,8 +1,6 @@
-#the below import has been replaced by the later mentioned import, recently by langchain as a per of their improvement strategy :)
-#from langchain.chat_models import ChatOpenAI
+# Import the correct ChatOpenAI from langchain_openai
 from langchain_openai import ChatOpenAI
 
-from langchain.schema import HumanMessage, SystemMessage
 from io import StringIO
 import streamlit as st
 from dotenv import load_dotenv
@@ -11,30 +9,13 @@ import base64
 import os
 import openai
 
-class ChatOpenAI:
-    def __init__(self, api_key, model_name="gpt-3.5-turbo", temperature=0.9):
-        self.api_key = api_key
-        self.model_name = model_name
-        self.temperature = temperature
-        openai.api_key = self.api_key
-
-    def chat(self, prompt):
-        response = openai.ChatCompletion.create(
-            model=self.model_name,
-            messages=[{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": prompt}],
-            temperature=self.temperature
-        )
-        return response['choices'][0]['message']['content']
-        
-
-#This function is typically used in Python to load environment variables from a .env file into the application's environment.
+# This function is typically used in Python to load environment variables from a .env file into the application's environment.
 load_dotenv()
 
 st.title("Let's do code review for your python code")
 st.header("Please upload your .py file here:")
 
-
-# Retrieve the API key from Hugging Face secret
+# Retrieve the API key from the environment
 api_key = os.getenv('OPENAI_API_KEY')
 
 # Function to download text content as a file using Streamlit
@@ -46,7 +27,7 @@ def text_downloader(raw_text):
     b64 = base64.b64encode(raw_text.encode()).decode()
     
     # Create a new filename with a timestamp
-    new_filename = "code_review_analysis_file_{}_.txt".format(timestr)
+    new_filename = f"code_review_analysis_file_{timestr}.txt"
     
     st.markdown("#### Download File ✅###")
     
@@ -57,36 +38,29 @@ def text_downloader(raw_text):
     st.markdown(href, unsafe_allow_html=True)
 
 # Capture the .py file data
-data = st.file_uploader("Upload python file",type=".py")
+data = st.file_uploader("Upload python file", type=".py")
 
 if data:
-
     # Create a StringIO object and initialize it with the decoded content of 'data'
     stringio = StringIO(data.getvalue().decode('utf-8'))
 
-    # Read the content of the StringIO object and store it in the variable 'read_data'
+    # Read the content of the StringIO object and store it in the variable 'fetched_data'
     fetched_data = stringio.read()
 
-    # Optionally, uncomment the following line to write the read data to the streamlit app
-    st.write(fetched_data)
+    # Display the uploaded Python code nicely
+    st.code(fetched_data, language="python")
 
     # Initialize a ChatOpenAI instance with the specified model name "gpt-3.5-turbo" and a temperature of 0.9.
-    chat = ChatOpenAI(api_key,model_name="gpt-3.5-turbo", temperature=0.9)
+    chat = ChatOpenAI(api_key, model_name="gpt-3.5-turbo", temperature=0.9)
 
-    # Create a SystemMessage instance with the specified content, providing information about the assistant's role.
-    systemMessage = SystemMessage(content="You are a code review assistant. Provide detailed suggestions to improve the given Python code along by mentioning the existing code line by line with proper indent")
+    # Create the prompt with system instruction and the uploaded code
+    prompt = "You are a code review assistant. Provide detailed suggestions to improve the given Python code along by mentioning the existing code line by line with proper indent. \n\n" + fetched_data
 
-    # Create a HumanMessage instance with content read from some data source.
-    humanMessage = HumanMessage(content=fetched_data)
-
-    # Call the chat method of the ChatOpenAI instance, passing a list of messages containing the system and human messages.
-    # Recently langchain has recommended to use invoke function for the below please :)
-    finalResponse = chat.invoke([systemMessage, humanMessage])
-
+    # Get the review from ChatOpenAI
+    finalResponse = chat.chat(prompt)
     
-    #Display review comments
-    st.markdown(finalResponse.content)
+    # Display review comments
+    st.markdown(finalResponse)
 
-
-    text_downloader(finalResponse.content)
-
+    # Allow the user to download the analysis as a file
+    text_downloader(finalResponse)
