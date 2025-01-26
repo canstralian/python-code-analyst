@@ -1,5 +1,9 @@
-langchain==0.2.5
+langchain
 streamlit==1.37.0
-openai
+openai==0.27.0
 python-dotenv==1.0.0
-langchain-openai==0.1.0
+langchain-openai
+beautifulsoup4==4.10.0
+requests==2.32.2
+aiohttp>=3.10.11 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
