@@ -1,79 +1,28 @@
-name: Python Actions Collection
-
-on: [push, pull_request]
-
-jobs:
-  python-actions:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: ${{ runner.os }}-pip-
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run Python Actions
-        uses: microsoft/action-python@0.7.2
-        with:
-          root: '.'
-          toml: 'pyproject.toml'
-          python_version: ${{ matrix.python-version }}
-          black: true
-          bandit: true
-          pylint: true
-          pyright: true
-          flake8: true
-          mypy: true
-          pytest: true
-          pypi_publish: false
-          args: ''
-          pypi_repo: 'pypi'
-          pypi_password: ${{ secrets.PYPI_PASSWORD }}
-          version_suffix: '-dev-${{ github.run_number }}'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          workdir: 'src'
-          testdir: 'tests'
-          coverage: true
-          flags: 'unittests'
-          level: 'error'
-          reporter: 'github-pr-check'
-          filter_mode: 'added'
-          fail_on_error: false
-          reviewdog_flags: ''
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Notify Slack on build success
-        if: success()
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          payload: '{"text":"Build completed successfully!"}'
-          channel: '#alerts'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-
-      - name: Notify Slack on build failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          payload: '{"text":"Build failed!"}'
-          channel: '#alerts'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
+- name: Run Python Actions
+  uses: microsoft/action-python@0.7.2
+  with:
+    root: '.'
+    toml: 'pyproject.toml'
+    python_version: ${{ matrix.python-version }}
+    black: true
+    bandit: true
+    pylint: true
+    pyright: true
+    flake8: true
+    mypy: true
+    pytest: true
+    pypi_publish: false
+    args: ''
+    pypi_repo: 'pypi'
+    pypi_password: ${{ secrets.PYPI_PASSWORD }}
+    version_suffix: '-dev-${{ github.run_number }}'
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    workdir: 'src'
+    testdir: 'tests'
+    coverage: true
+    flags: 'unittests'
+    level: 'error'
+    reporter: 'github-pr-check'
+    filter_mode: 'added'
+    fail_on_error: false
+    reviewdog_flags: ''
