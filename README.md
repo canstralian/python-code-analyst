@@ -14,6 +14,15 @@ license: mit
 
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
 
+## Project Overview
+
+Python Code Analyst is a web application built with Streamlit that allows users to input news article URLs and receive summarized content in various tones. The application fetches the content of the news articles, processes it, and generates summaries using Cloudflare Workers AI. The main features of the project include:
+
+* Fetching news article content from allowed domains
+* Summarizing the content in different tones (e.g., humorous, majestic, academic)
+* Handling errors for invalid URLs or disallowed domains
+* Providing a user-friendly interface with Streamlit
+
 ## Slack Notifications Configuration
 
 To configure Slack notifications in your GitHub Actions workflow, you can use the `slackapi/slack-github-action` action. This action allows you to send messages to a specified Slack channel upon the completion of your build.
