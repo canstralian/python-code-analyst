@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "test": "pytest",
+    "launch": "python app.py"
+  }
+}
