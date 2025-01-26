@@ -27,7 +27,7 @@ def fetch_article_content(news_link):
     if parsed_url.netloc not in ALLOWED_DOMAINS:
         st.error("The provided URL is not allowed.")
         return None
-    response = requests.get(news_link)
+    response = requests.get(news_link, timeout=10)
     if response.status_code != 200:
         st.error(f"Failed to fetch the article. Status code: {response.status_code}")
         return None
