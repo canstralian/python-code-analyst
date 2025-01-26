@@ -10,6 +10,8 @@ pinned: false
 license: mit
 ---
 
+[![Pylint](https://github.com/canstralian/python-code-analyst/actions/workflows/pylint.yml/badge.svg)](https://github.com/canstralian/python-code-analyst/actions/workflows/pylint.yml)
+
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
 
 ## Slack Notifications Configuration
