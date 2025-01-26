@@ -6,6 +6,7 @@ import os
 import io
 import time
 import base64
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 import requests
@@ -18,8 +19,14 @@ CLOUDFLARE_ACCOUNT_ID = os.environ.get("CF_ACCOUNT_ID")
 CLOUDFLARE_API_TOKEN = os.environ.get("CF_API_TOKEN")
 url = f'https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/mistral/mistral-7b-instruct-v0.1'
 
+ALLOWED_DOMAINS = ["example.com", "another-example.com"]
+
 def fetch_article_content(news_link):
     """Fetches and returns the text content of the news article."""
+    parsed_url = urlparse(news_link)
+    if parsed_url.netloc not in ALLOWED_DOMAINS:
+        st.error("The provided URL is not allowed.")
+        return None
     response = requests.get(news_link)
     if response.status_code != 200:
         st.error(f"Failed to fetch the article. Status code: {response.status_code}")
