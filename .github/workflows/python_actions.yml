@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   python-actions:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     steps:
       - uses: actions/checkout@v4
 
@@ -15,10 +18,10 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: ${{ runner.os }}-pip-
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
-          python-version: 3.7
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -30,12 +33,13 @@ jobs:
         with:
           root: '.'
           toml: 'pyproject.toml'
-          python_version: 3.7
+          python_version: ${{ matrix.python-version }}
           black: true
           bandit: true
           pylint: true
           pyright: true
           flake8: true
+          mypy: true
           pytest: true
           pypi_publish: false
           args: ''
@@ -52,3 +56,24 @@ jobs:
           filter_mode: 'added'
           fail_on_error: false
           reviewdog_flags: ''
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Notify Slack on build success
+        if: success()
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: '{"text":"Build completed successfully!"}'
+          channel: '#alerts'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Notify Slack on build failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: '{"text":"Build failed!"}'
+          channel: '#alerts'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
