@@ -48,8 +48,7 @@ def summarize_article(text_data, tone):
             st.error(f"Failed to summarize the article. Status code: {response.status_code}")
             return None
         response_data = response.json()
-        summary = response_data["result"]["response"]
-        return summary
+        return response_data["result"]["response"]
     except Exception as e:
         st.error(f"Error summarizing article: {e}")
         return None
