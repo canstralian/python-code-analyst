@@ -37,3 +37,17 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Notify Slack on build success
+      if: success()
+      uses: slackapi/slack-github-action@v1.25.0
+      with:
+        payload: '{"text":"Build completed successfully!"}'
+        channel: '#alerts'
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
+    - name: Notify Slack on build failure
+      if: failure()
+      uses: slackapi/slack-github-action@v1.25.0
+      with:
+        payload: '{"text":"Build failed!"}'
+        channel: '#alerts'
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
