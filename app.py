@@ -1,66 +1,96 @@
-# Import the correct ChatOpenAI from langchain_openai
-from langchain_openai import ChatOpenAI
+"""
+This module defines the main function for the AI News Summarizer app.
+"""
 
-from io import StringIO
-import streamlit as st
-from dotenv import load_dotenv
+import os
+import io
 import time
 import base64
-import os
-import openai
+from dotenv import load_dotenv
+from bs4 import BeautifulSoup
+import requests
+import streamlit as st
+from langchain_openai import ChatOpenAI
 
-# This function is typically used in Python to load environment variables from a .env file into the application's environment.
+# Load API secrets
 load_dotenv()
+CLOUDFLARE_ACCOUNT_ID = os.environ.get("CF_ACCOUNT_ID")
+CLOUDFLARE_API_TOKEN = os.environ.get("CF_API_TOKEN")
+url = f'https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/mistral/mistral-7b-instruct-v0.1'
 
-st.title("Let's do code review for your python code")
-st.header("Please upload your .py file here:")
+def fetch_article_content(news_link):
+    """Fetches and returns the text content of the news article."""
+    response = requests.get(news_link)
+    if response.status_code != 200:
+        st.error(f"Failed to fetch the article. Status code: {response.status_code}")
+        return None
+    soup = BeautifulSoup(response.text, 'html.parser')
+    text_data = ' '.join(tag.get_text() for tag in soup.find_all('p'))
+    return text_data
 
-# Retrieve the API key from the environment
-api_key = os.getenv('OPENAI_API_KEY')
+def summarize_article(text_data, tone):
+    """Summarizes the article content using Cloudflare Workers AI."""
+    headers = {
+        'Authorization': f'Bearer {CLOUDFLARE_API_TOKEN}',
+        'Content-Type': 'application/json'
+    }
+    data = {
+        "messages": [
+            {
+                "role": "user",
+                "content": f"Summarize the following content from a news article in a {tone} tone: {text_data}"
+            }
+        ],
+        "lora": "cf-public-cnn-summarization"
+    }
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        if response.status_code != 200:
+            st.error(f"Failed to summarize the article. Status code: {response.status_code}")
+            return None
+        response_data = response.json()
+        summary = response_data["result"]["response"]
+        return summary
+    except Exception as e:
+        st.error(f"Error summarizing article: {e}")
+        return None
 
-# Function to download text content as a file using Streamlit
-def text_downloader(raw_text):
-    # Generate a timestamp for the filename to ensure uniqueness
-    timestr = time.strftime("%Y%m%d-%H%M%S")
+def main():
+    """Main function to run the Streamlit app."""
+    st.markdown("""
+        <style>
+            .big-font {
+                font-size:40px !important;
+                color:green;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    st.markdown('<p class="big-font"><p>AI🤖 News🗞️ Summarizer</p>', unsafe_allow_html=True)
+    st.write(":blue[This Python🐍 web🕸️ app is built👩🏻‍💻 w/ [Streamlit](https://streamlit.io/) && [Cloudflare Workers AI](https://ai.cloudflare.com/)]")
+
+    news_link = st.text_input('Please enter a news link to summarize')
+    tone = st.selectbox(
+        ':green[What tone do you want the news summary to take?]',
+        ('humorous🤣', 'majestic🌊', 'academic📚', '✨inspirational✨', 'dramatic🎭', 'gen z👧🏻')
+    )
+    st.write("You selected: ", tone)
     
-    # Encode the raw text in base64 format for file download
-    b64 = base64.b64encode(raw_text.encode()).decode()
-    
-    # Create a new filename with a timestamp
-    new_filename = f"code_review_analysis_file_{timestr}.txt"
-    
-    st.markdown("#### Download File ✅###")
-    
-    # Create an HTML link with the encoded content and filename for download
-    href = f'<a href="data:file/txt;base64,{b64}" download="{new_filename}">Click Here!!</a>'
-    
-    # Display the HTML link using Streamlit markdown
-    st.markdown(href, unsafe_allow_html=True)
+    if st.button('Enter') and tone and news_link:
+        if not urlparse(news_link).scheme:
+            st.error("Please enter a valid URL.")
+            return
 
-# Capture the .py file data
-data = st.file_uploader("Upload python file", type=".py")
+        with st.spinner('Processing📈...'):
+            text_data = fetch_article_content(news_link)
+            if text_data:
+                summary = summarize_article(text_data, tone)
+                if summary:
+                    html_str = f"""
+                    <p style="font-family:Comic Sans; color:Pink; font-size: 18px;">{summary}</p>
+                    """
+                    st.markdown(html_str, unsafe_allow_html=True)
 
-if data:
-    # Create a StringIO object and initialize it with the decoded content of 'data'
-    stringio = StringIO(data.getvalue().decode('utf-8'))
+    st.write("Made w/ ❤️ in SF 🌁 || ✅ out the [👩🏻‍💻GitHub repo](https://github.com/elizabethsiegle/cf-ai-lora-news-summarizer)")
 
-    # Read the content of the StringIO object and store it in the variable 'fetched_data'
-    fetched_data = stringio.read()
-
-    # Display the uploaded Python code nicely
-    st.code(fetched_data, language="python")
-
-    # Initialize a ChatOpenAI instance with the specified model name "gpt-3.5-turbo" and a temperature of 0.9.
-    chat = ChatOpenAI(api_key, model_name="gpt-3.5-turbo", temperature=0.9)
-
-    # Create the prompt with system instruction and the uploaded code
-    prompt = "You are a code review assistant. Provide detailed suggestions to improve the given Python code along by mentioning the existing code line by line with proper indent. \n\n" + fetched_data
-
-    # Get the review from ChatOpenAI
-    finalResponse = chat.chat(prompt)
-    
-    # Display review comments
-    st.markdown(finalResponse)
-
-    # Allow the user to download the analysis as a file
-    text_downloader(finalResponse)
+if __name__ == "__main__":
+    main()
