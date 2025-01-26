@@ -25,8 +25,7 @@ def fetch_article_content(news_link):
         st.error(f"Failed to fetch the article. Status code: {response.status_code}")
         return None
     soup = BeautifulSoup(response.text, 'html.parser')
-    text_data = ' '.join(tag.get_text() for tag in soup.find_all('p'))
-    return text_data
+    return ' '.join(tag.get_text() for tag in soup.find_all('p'))
 
 def summarize_article(text_data, tone):
     """Summarizes the article content using Cloudflare Workers AI."""
