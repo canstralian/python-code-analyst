@@ -1,18 +1,10 @@
-"""
-This module defines the main function for the AI News Summarizer app.
-"""
-
 import os
-import io
-import time
-import base64
 import json
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 import requests
 import streamlit as st
-from langchain_openai import ChatOpenAI
 from typing import Optional
 
 # Load API secrets
