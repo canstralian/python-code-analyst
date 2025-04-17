@@ -1,10 +1,6 @@
-It seems like you're merging two different versions of your project description and documentation. Here's a clean, final version that consolidates the information:
+# Project Overview
 
----
-
-## Project Overview
-
-**Python Code Analyst** is a web application built with Streamlit that allows users to input news article URLs and receive summarized content in various tones. The application fetches the content of the news articles, processes it, and generates summaries using Cloudflare Workers AI. The main features of the project include:
+* Python Code Analyst** is a web application built with Streamlit that allows users to input news article URLs and receive summarized content in various tones. The application fetches the content of the news articles, processes it, and generates summaries using Cloudflare Workers AI. The main features of the project include:
 
 - Fetching news article content from allowed domains
 - Summarizing the content in different tones (e.g., humorous, majestic, academic)
